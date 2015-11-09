@@ -4,28 +4,32 @@ var app = window.app;
 
 class CartItems extends React.Component  {
 
-    constructor (props) {
-        super(props);
-        
-        this.props.items.on('all', function() {
-            this.setState({data: this.props.items});
-        }.bind(this));
+    constructor (...props) {
+        super(...props);
 
+        this.props.items.on('all', () => this.onFetchSuccess());
         this.state = {
             data: []
-        }
+        };
     }
 
     loadItemsFromServer () {
-        this.props.items.fetch({ 
-            success: function() {
-                this.setState({data: this.props.items});
-            }.bind(this),
-            error: function(){
-                console.log('There was some error in loading from local storage');
-            }
+        this.props.items.fetch({
+            success: () => this.onFetchSuccess(),
+            error: this.onFetchError
+        });
+    }    
+
+    onFetchSuccess () {
+        this.setState({
+            data: this.props.items
         });
     }
+
+    onFetchError () {
+        console.log('There was some error in loading from local storage');
+    }
+
 
     componentDidMount () {
         this.loadItemsFromServer();
@@ -62,8 +66,8 @@ class CartItemsList extends React.Component  {
 
 class CartItem extends React.Component  {
 
-    constructor (props) {
-        super(props);
+    constructor (...props) {
+        super(...props);
         this.handleClick = this.handleClick.bind(this);
     }    
 
@@ -113,17 +117,10 @@ class CartSortBox extends React.Component  {
 
 class CartSyncMessageBox extends React.Component  {
 
-    constructor (props) {
-        super(props);
+    constructor (...props) {
+        super(...props);
 
-        this.props.items.on('cartAjaxSynced', function(result) {
-            this.setState({
-                    visibility: '',
-                    syncResult: result
-            });
-            setTimeout(this.hideBox.bind(this), 1000);
-        }.bind(this));
-
+        this.props.items.on('cartAjaxSynced', (result) => this.onCartAjaxSynced(result));
         this.handleClick = this.handleClick.bind(this);
         this.state = {
             visibility: 'hide',
@@ -131,8 +128,18 @@ class CartSyncMessageBox extends React.Component  {
         };
     }
 
+    onCartAjaxSynced (result) {
+        this.setState({
+            visibility: '',
+            syncResult: result
+        });
+        setTimeout( () => this.hideBox(), 1000);
+    }
+
     hideBox () {
-        this.setState({visibility: 'hide'});
+        this.setState({
+            visibility: 'hide'}
+        );
     }
 
     handleClick (e) {
@@ -154,8 +161,8 @@ class CartSyncMessageBox extends React.Component  {
 
 class CartSortItem extends React.Component  {
 
-    constructor (props) {
-        super(props);
+    constructor (...props) {
+        super(...props);
         this.handleClick = this.handleClick.bind(this);
     }    
 

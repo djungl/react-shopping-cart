@@ -4,8 +4,8 @@ var app = window.app;
 
 app.Cart = class Cart extends Backbone.Collection {
 
-	constructor(options) {
-		super(options);
+	constructor(...options) {
+		super(...options);
 		
 		this.model = app.CartItem;
 		this.url = '/cart';
@@ -55,15 +55,18 @@ app.Cart = class Cart extends Backbone.Collection {
 			// "ajaxSync" flag invokes native backbone.sync method 
 			// to sync collection with server
 			ajaxSync: true, 
-			success: function() {
-			    this.trigger('cartAjaxSynced', 'Cart synced with the server');
-			},
-			error: function(xhr){
-				this.trigger('cartAjaxSynced', 'Sync error: ' + xhr.status 
-					+ " (" + xhr.statusText + ")");
-			}.bind(this)
-
+			success: this.onSyncSuccess,
+			error: (xhr) => this.onSyncError(xhr)
 		});
+	}
+
+	onSyncSuccess () {
+		this.trigger('cartAjaxSynced', 'Cart synced with the server');
+	}
+
+	onSyncError (xhr) {
+		this.trigger('cartAjaxSynced', 'Sync error: ' + xhr.status 
+					+ " (" + xhr.statusText + ")");
 	}
 
 	// function returns item in cart by given 'name' and 'price' of selected item in shop

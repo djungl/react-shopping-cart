@@ -1,4 +1,4 @@
 'use strict';
 
 window.app = window.app || {};
-window.app.dispatcher = _.clone(Backbone.Events);
+window.app.dispatcher = Object.create(Backbone.Events);

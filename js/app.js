@@ -4,27 +4,33 @@ var app = window.app;
 
 class ShopItems extends React.Component  {
 
-    constructor (props) {
-        super(props);
+    constructor (...props) {
+        super(...props);
         
         this.loadItemsFromServer();
-
         this.state = {
             data: []
         }
     }
 
     loadItemsFromServer () {
-        this.props.items.fetch({ 
+        this.props.items.fetch({
             url: this.props.url,
-            success: function() {
-                this.setState({data: this.props.items});
-            }.bind(this),
-            error: function(){
-                console.log('There was some error in loading and processing the JSON file ' + this.props.url);
-            }
+            success: () => this.onFetchSuccess(),
+            error: this.onFetchError
+        });
+    }    
+
+    onFetchSuccess () {
+        this.setState({
+            data: this.props.items
         });
     }
+
+    onFetchError () {
+        console.log('There was some error in loading and processing the JSON file ' + this.props.url);
+    }
+
 
     render () {
         return (
@@ -55,8 +61,8 @@ class ShopItemsList extends React.Component  {
 
 class ShopItem extends React.Component  {
 
-    constructor (props) {
-        super(props);
+    constructor (...props) {
+        super(...props);
         this.handleClick = this.handleClick.bind(this);
     }
 
