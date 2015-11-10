@@ -7,7 +7,7 @@ class CartItems extends React.Component  {
     constructor (...props) {
         super(...props);
 
-        this.props.items.on('all', () => this.onFetchSuccess());
+        this.props.items.on('all', this.onFetchSuccess.bind(this));
         this.state = {
             data: []
         };
@@ -15,7 +15,7 @@ class CartItems extends React.Component  {
 
     loadItemsFromServer () {
         this.props.items.fetch({
-            success: () => this.onFetchSuccess(),
+            success: this.onFetchSuccess.bind(this),
             error: this.onFetchError
         });
     }    
@@ -120,7 +120,7 @@ class CartSyncMessageBox extends React.Component  {
     constructor (...props) {
         super(...props);
 
-        this.props.items.on('cartAjaxSynced', (result) => this.onCartAjaxSynced(result));
+        this.props.items.on('cartAjaxSynced', this.onCartAjaxSynced.bind(this));
         this.handleClick = this.handleClick.bind(this);
         this.state = {
             visibility: 'hide',
@@ -128,12 +128,12 @@ class CartSyncMessageBox extends React.Component  {
         };
     }
 
-    onCartAjaxSynced (result) {
+    onCartAjaxSynced (...result) {
         this.setState({
             visibility: '',
             syncResult: result
         });
-        setTimeout( () => this.hideBox(), 1000);
+        setTimeout( this.hideBox.bind(this), 1000);
     }
 
     hideBox () {
