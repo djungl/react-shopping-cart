@@ -16,7 +16,7 @@ class ShopItems extends React.Component  {
     loadItemsFromServer () {
         this.props.items.fetch({
             url: this.props.url,
-            success: () => this.onFetchSuccess(),
+            success: this.onFetchSuccess.bind(this),
             error: this.onFetchError
         });
     }    
