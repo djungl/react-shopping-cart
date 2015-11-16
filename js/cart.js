@@ -18,36 +18,20 @@ app.Cart = class Cart extends Backbone.Collection {
 
 	initialize () {
 		// Listen to events from dispatcher
-		this.listenTo(app.dispatcher || {}, 'addToCart', this.addToCart);
-		this.listenTo(app.dispatcher || {}, 'removeFromCart', this.removeFromCart);
-		this.listenTo(app.dispatcher || {}, 'sortCartBy', this.sortCartBy);
-		this.listenTo(app.dispatcher || {}, 'syncCart', this.syncCartWithServer);
+		this.listenTo(app.dispatcher || {}, "addToCart", this.addToCart);
+		this.listenTo(app.dispatcher || {}, "removeFromCart", this.removeFromCart);
+		this.listenTo(app.dispatcher || {}, "sortCartBy", this.sortCartBy);
+		this.listenTo(app.dispatcher || {}, "syncCart", this.syncCartWithServer);
 	}
 
 	addToCart ( selectedItem ) {
-        var cart_item = this.findOrCreateItemInCart(selectedItem);
-    	// add 1 piece of item to cart
-    	cart_item.changeQuantity(1);
-        cart_item.save();
+        var cartItem = this.findOrCreateItemInCart(selectedItem);
+        app.dispatcher.trigger("addItem", cartItem);
 	}
 
 	removeFromCart ( selectedItem ) {
-		var cart_item = this.getItemInCart(selectedItem),
-			new_quantity;
-
-        if (!cart_item) {
-        	return;
-        }
-
-        // remove by 1 piece of item until all pieces are gone,
-        // then remove item from Cart
-    	new_quantity = cart_item.changeQuantity(-1);
-
-    	if (new_quantity < 1) {
-    		cart_item.destroy();
-    	} else {
-    		cart_item.save();
-    	}
+		var cartItem = this.findOrCreateItemInCart(selectedItem);
+		app.dispatcher.trigger("removeItem", cartItem);
 	}
 
 	syncCartWithServer () {
@@ -56,7 +40,7 @@ app.Cart = class Cart extends Backbone.Collection {
 			// to sync collection with server
 			ajaxSync: true, 
 			success: this.onSyncSuccess,
-			error: (xhr) => this.onSyncError(xhr)
+			error: this.onSyncError.bind(this)
 		});
 	}
 
@@ -69,26 +53,22 @@ app.Cart = class Cart extends Backbone.Collection {
 					+ " (" + xhr.statusText + ")");
 	}
 
-	// function returns item in cart by given 'name' and 'price' of selected item in shop
-	getItemInCart ( item ) {
-		return this.find(( model ) =>  
-    			(model.get('name') == item.get("name") 
-    			&& model.get('price') == item.get("price")) 
-    		);
+	getSelectedItemProps ( item ) {
+		return {
+        		"name": item.get("name"),
+        		"price": item.get("price")
+        	};	
 	}
 
 	findOrCreateItemInCart ( selectedItem ) {
-        var cart_item = this.getItemInCart(selectedItem);
+        var itemProps = this.getSelectedItemProps(selectedItem),
+        	cartItem = this.findWhere(itemProps);
 
-        if (!cart_item) {
-        	cart_item = new this.model({
-	            name: selectedItem.get("name"),
-				price: selectedItem.get("price")
-        	});
-        	this.add(cart_item);
+        if (!cartItem) {
+			cartItem = this.create(itemProps);        	
         }
 
-        return cart_item;
+        return cartItem;
 	}
 
 	sortCartBy ( sorting ) {

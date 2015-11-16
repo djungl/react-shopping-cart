@@ -12,9 +12,41 @@ app.CartItem = class CartItem extends Backbone.Model {
 		};
 	}
 
-	changeQuantity ( value ) {
-		var new_quantity = this.get("quantity") + value;
-		this.set("quantity", new_quantity);
-		return new_quantity;
+	initialize () {
+		// Listen to events from dispatcher
+		this.listenTo(app.dispatcher || {}, 'addItem', this.addItem);
+		this.listenTo(app.dispatcher || {}, 'removeItem', this.removeItem);
+
+	}
+
+	addItem ( item ) {
+		var newQuantity;
+		
+		if (this != item) {
+			return;
+		}
+
+		newQuantity = item.get("quantity") + 1;
+		item.set("quantity", newQuantity);
+		item.save();
+	}
+
+	removeItem ( item ) {
+		var newQuantity;
+		
+		if (this != item) {
+			return;
+		}
+
+        // remove by 1 piece of item until all pieces are gone,
+        // then remove item from Cart
+		newQuantity = item.get("quantity") - 1;
+		item.set("quantity", newQuantity);
+
+    	if (newQuantity < 1) {
+    		item.destroy();
+    	} else {
+    		item.save();
+    	}
 	}
 }
